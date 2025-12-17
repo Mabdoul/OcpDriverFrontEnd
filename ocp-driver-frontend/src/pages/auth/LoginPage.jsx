@@ -6,17 +6,17 @@ const validateEmail = (email) => /\S+@\S+\.\S+/.test(email)
 
 export default function LoginPage() {
   const dispatch = useDispatch()
-  const { loading, error, successMessage } = useSelector((state) => state.auth)
+  const { loading, error } = useSelector((state) => state.auth)
 
   const [form, setForm] = useState({ email: '', password: '', role: 'client' })
   const [touched, setTouched] = useState({})
   const [localErrors, setLocalErrors] = useState({})
 
   useEffect(() => {
-    return () => {
-      dispatch(clearStatus())
-    }
+    return () => dispatch(clearStatus())
   }, [dispatch])
+
+  // Navigation is handled by App.jsx based on token + role.
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -31,14 +31,9 @@ export default function LoginPage() {
 
   const validate = () => {
     const errors = {}
-    if (!form.email) {
-      errors.email = 'Email requis'
-    } else if (!validateEmail(form.email)) {
-      errors.email = 'Format d’email invalide'
-    }
-    if (!form.password) {
-      errors.password = 'Mot de passe requis'
-    }
+    if (!form.email) errors.email = 'Email requis'
+    else if (!validateEmail(form.email)) errors.email = 'Format d’email invalide'
+    if (!form.password) errors.password = 'Mot de passe requis'
     setLocalErrors(errors)
     return Object.keys(errors).length === 0
   }
@@ -58,9 +53,8 @@ export default function LoginPage() {
 
       {error && <div className="alert error">{error}</div>}
 
-      {successMessage && <div className="alert success">{successMessage}</div>}
-
       <form onSubmit={handleSubmit} className="form">
+        {/* Role toggle */}
         <div className="field">
           <span className="label">Se connecter en tant que</span>
           <div className="role-toggle">
@@ -81,10 +75,9 @@ export default function LoginPage() {
           </div>
         </div>
 
+        {/* Email */}
         <div className="field">
-          <label htmlFor="email" className="label">
-            Email
-          </label>
+          <label htmlFor="email" className="label">Email</label>
           <input
             id="email"
             name="email"
@@ -99,10 +92,9 @@ export default function LoginPage() {
           {showError('email') && <p className="error-text">{localErrors.email}</p>}
         </div>
 
+        {/* Password */}
         <div className="field">
-          <label htmlFor="password" className="label">
-            Mot de passe
-          </label>
+          <label htmlFor="password" className="label">Mot de passe</label>
           <input
             id="password"
             name="password"
@@ -124,5 +116,3 @@ export default function LoginPage() {
     </div>
   )
 }
-
-

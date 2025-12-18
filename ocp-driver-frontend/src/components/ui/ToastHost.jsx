@@ -6,33 +6,34 @@ export default function ToastHost() {
   const dispatch = useDispatch()
   const { error, successMessage } = useSelector((s) => s.auth)
 
-  const [toast, setToast] = useState(null) // { type: 'success'|'error', message: string }
+  const [toast, setToast] = useState(null)
 
   useEffect(() => {
     if (!error && !successMessage) return
 
     const type = error ? 'error' : 'success'
     const message = error || successMessage
+
+    // 🔥 نحيدوها من Redux مباشرة
+    dispatch(clearStatus())
+
     setToast({ type, message })
 
-    const id = setTimeout(() => {
+    const timer = setTimeout(() => {
       setToast(null)
-      dispatch(clearStatus())
-    }, 4000)
+    }, 3000)
 
-    return () => clearTimeout(id)
+    return () => clearTimeout(timer)
   }, [error, successMessage, dispatch])
 
   if (!toast) return null
 
   return (
-    <div className="toast-wrap" aria-live="polite" aria-atomic="true">
+    <div className="toast-wrap">
       <div className={`toast ${toast.type}`}>
-        <div className="toast-title">{toast.type === 'success' ? 'Succès' : 'Erreur'}</div>
-        <div className="toast-message">{toast.message}</div>
+        <strong>{toast.type === 'success' ? 'Succès' : 'Erreur'}</strong>
+        <div>{toast.message}</div>
       </div>
     </div>
   )
 }
-
-

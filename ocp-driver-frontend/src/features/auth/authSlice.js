@@ -48,7 +48,9 @@ export const registerUser = createAsyncThunk(
       const data = text ? JSON.parse(text) : {}
 
       if (!res.ok) {
-        return rejectWithValue(data.error || data.message || 'Registration failed')
+        return rejectWithValue(
+          data.error || data.message || 'Registration failed'
+        )
       }
 
       return { ...data, role }
@@ -58,17 +60,23 @@ export const registerUser = createAsyncThunk(
   }
 )
 
-// ================= SLICE =================
+// ================= INITIAL STATE =================
 const initialToken =
   typeof window !== 'undefined' ? localStorage.getItem('token') : null
 
 const initialRole =
   typeof window !== 'undefined' ? localStorage.getItem('role') : null
 
+const initialUser =
+  typeof window !== 'undefined'
+    ? JSON.parse(localStorage.getItem('user'))
+    : null
+
+// ================= SLICE =================
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
-    user: null,
+    user: initialUser,
     token: initialToken,
     role: initialRole,
     loading: false,
@@ -80,8 +88,12 @@ const authSlice = createSlice({
       state.user = null
       state.token = null
       state.role = null
+      state.error = null
+      state.successMessage = null
+
       localStorage.removeItem('token')
       localStorage.removeItem('role')
+      localStorage.removeItem('user')
     },
     clearStatus(state) {
       state.error = null
@@ -90,33 +102,40 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // LOGIN
+      // ================= LOGIN =================
       .addCase(loginUser.pending, (state) => {
         state.loading = true
         state.error = null
+        state.successMessage = null
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false
+
         state.user =
           action.payload.user ||
-          action.payload.chauffeur ||
-          action.payload.client
+          action.payload.client ||
+          action.payload.chauffeur
 
         state.token = action.payload.token
         state.role = action.payload.role
+
         state.successMessage =
           action.payload.message ||
-          `Connexion réussie (${action.payload.role === 'chauffeur' ? 'Chauffeur' : 'Client'})`
+          `Connexion réussie (${
+            action.payload.role === 'chauffeur' ? 'Chauffeur' : 'Client'
+          })`
 
+        // ✅ persistence
         localStorage.setItem('token', action.payload.token)
         localStorage.setItem('role', action.payload.role)
+        localStorage.setItem('user', JSON.stringify(state.user))
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload
       })
 
-      // REGISTER
+      // ================= REGISTER =================
       .addCase(registerUser.pending, (state) => {
         state.loading = true
         state.error = null
@@ -124,17 +143,18 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false
-        // After registration we do NOT auto-login.
-        // Keep token/role empty so user is returned to the login page.
+
         state.user = null
         state.token = null
         state.role = null
+
         state.successMessage =
           action.payload.message ||
           'Compte créé avec succès. Veuillez vous connecter.'
 
         localStorage.removeItem('token')
         localStorage.removeItem('role')
+        localStorage.removeItem('user')
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false
@@ -145,4 +165,3 @@ const authSlice = createSlice({
 
 export const { logout, clearStatus } = authSlice.actions
 export default authSlice.reducer
-

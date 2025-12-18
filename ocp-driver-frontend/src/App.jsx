@@ -12,32 +12,29 @@ function App() {
   const [mode, setMode] = useState('login')
   const { token, role } = useSelector((state) => state.auth)
 
-  // If user is logged in, redirect based on role
-  if (token) {
-    if (role === 'client')
-      return (
-        <>
-          <ToastHost />
-          <ClientOrderPage />
-        </>
-      )
-    if (role === 'chauffeur')
-      return (
-        <>
-          <ToastHost />
-          <ChauffeurPage />
-        </>
-      )
-  }
-
   return (
-    <div className="auth-page">
-      <ToastHost />
-      <AuthNavbar mode={mode} onChange={setMode} />
-      <main className="auth-main">
-        {mode === 'login' ? <LoginPage /> : <RegisterPage onRegistered={() => setMode('login')} />}
-      </main>
-    </div>
+    <>
+     
+
+      {token ? (
+        role === 'client' ? (
+          <ClientOrderPage />
+        ) : role === 'chauffeur' ? (
+          <ChauffeurPage />
+        ) : null
+      ) : (
+        <div className="auth-page">
+          <AuthNavbar mode={mode} onChange={setMode} />
+          <main className="auth-main">
+            {mode === 'login' ? (
+              <LoginPage />
+            ) : (
+              <RegisterPage onRegistered={() => setMode('login')} />
+            )}
+          </main>
+        </div>
+      )}
+    </>
   )
 }
 

@@ -6,7 +6,7 @@ const API_URL = 'http://127.0.0.1:8000/api'
 
 export default function ChauffeurPage() {
   const dispatch = useDispatch()
-  const { token, role, user } = useSelector((state) => state.auth)
+  const { token, user } = useSelector((state) => state.auth)
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')

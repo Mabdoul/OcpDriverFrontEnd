@@ -14,7 +14,7 @@ const API_URL = 'http://127.0.0.1:8000/api'
 
 export default function ClientOrderPage() {
   const dispatch = useDispatch()
-  const { token, role, user } = useSelector((state) => state.auth)
+  const { token,user } = useSelector((state) => state.auth)
 
   const [pointA, setPointA] = useState(LOCATIONS[0])
   const [pointB, setPointB] = useState(LOCATIONS[1])

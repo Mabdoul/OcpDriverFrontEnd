@@ -13,14 +13,9 @@ export default function ChauffeurPage() {
   const [trips, setTrips] = useState([])
   const [lastUpdated, setLastUpdated] = useState(null)
 
-  // If not logged in or not chauffeur, App.jsx will render auth pages.
-
   const fetchTrips = async () => {
     setError('')
-    if (!token) {
-      setError('Token introuvable. Veuillez vous reconnecter.')
-      return
-    }
+    if (!token) return setError('Token introuvable. Veuillez vous reconnecter.')
 
     setLoading(true)
     try {
@@ -34,13 +29,9 @@ export default function ChauffeurPage() {
 
       const text = await res.text()
       const data = text ? JSON.parse(text) : {}
+      if (!res.ok) throw new Error(data.message || data.error || 'Impossible de récupérer les commandes.')
 
-      if (!res.ok) {
-        throw new Error(data.message || data.error || 'Impossible de récupérer les commandes.')
-      }
-
-      const list = data.trips || data.data || data.orders || []
-      setTrips(Array.isArray(list) ? list : [])
+      setTrips(Array.isArray(data) ? data : [])
       setLastUpdated(new Date())
     } catch (err) {
       setError(err.message || 'Erreur réseau.')
@@ -55,8 +46,36 @@ export default function ChauffeurPage() {
     return () => clearInterval(intervalId)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleLogout = () => {
-    dispatch(logout())
+  const handleLogout = () => dispatch(logout())
+
+  const handleAccept = async (tripId) => {
+    try {
+      const res = await fetch(`${API_URL}/chauffeur/trip/${tripId}/accept`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Impossible d’accepter le trajet.')
+      fetchTrips()
+    } catch (err) {
+      alert(err.message)
+    }
+  }
+
+  const handleRefuse = async (tripId) => {
+    try {
+      const res = await fetch(`${API_URL}/chauffeur/trip/${tripId}/refuse`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Impossible de refuser le trajet.')
+
+      // 🔹 Remove trip locally for this chauffeur
+      setTrips(prev => prev.filter(t => t.id !== tripId))
+    } catch (err) {
+      alert(err.message)
+    }
   }
 
   return (
@@ -68,18 +87,12 @@ export default function ChauffeurPage() {
             <span className="brand-text">Chauffeur</span>
           </div>
           <div className="client-actions">
-            <span className="client-hello">
-              {user?.name ? `Bonjour, ${user.name}` : '—'}
-            </span>
-            <span className="client-hello">
-              {lastUpdated ? `Dernière mise à jour: ${lastUpdated.toLocaleTimeString()}` : '—'}
-            </span>
+            <span className="client-hello">{user?.name ? `Bonjour, ${user.name}` : '—'}</span>
+            <span className="client-hello">{lastUpdated ? `Dernière mise à jour: ${lastUpdated.toLocaleTimeString()}` : '—'}</span>
             <button type="button" className="nav-link" onClick={fetchTrips} disabled={loading}>
               {loading ? 'Actualisation…' : 'Actualiser'}
             </button>
-            <button type="button" className="logout-btn" onClick={handleLogout}>
-              Se déconnecter
-            </button>
+            <button type="button" className="logout-btn" onClick={handleLogout}>Se déconnecter</button>
           </div>
         </div>
       </header>
@@ -92,17 +105,14 @@ export default function ChauffeurPage() {
           </p>
 
           {error && <div className="alert error">{error}</div>}
-
-          {!error && trips.length === 0 && (
-            <div className="alert success">Aucune commande pour le moment.</div>
-          )}
+          {!error && trips.length === 0 && <div className="alert success">Aucune commande pour le moment.</div>}
 
           <div className="trip-list">
-            {trips.map((t, idx) => {
-              const id = t.id ?? t.trip_id ?? idx
-              const origin = t.origin ?? t.pointA ?? t.from ?? '—'
-              const destination = t.destination ?? t.pointB ?? t.to ?? '—'
-              const status = t.status ?? t.state ?? 'en attente'
+            {trips.map((t) => {
+              const id = t.id
+              const origin = t.start_lat ?? '—'
+              const destination = t.end_lat ?? '—'
+              const status = t.status ?? 'en attente'
 
               return (
                 <div key={id} className="trip-card">
@@ -119,7 +129,42 @@ export default function ChauffeurPage() {
                         <span className="trip-value">{destination}</span>
                       </div>
                     </div>
-                    <span className="trip-status">{String(status)}</span>
+
+                    <div className="trip-actions">
+                      {status === 'pending' ? (
+                        <>
+                          <button
+                            onClick={() => handleAccept(id)}
+                            style={{
+                              padding: '5px 12px',
+                              marginRight: '8px',
+                              backgroundColor: '#4CAF50',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '4px',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Accepter
+                          </button>
+                          <button
+                            onClick={() => handleRefuse(id)}
+                            style={{
+                              padding: '5px 12px',
+                              backgroundColor: '#f44336',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '4px',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Refuser
+                          </button>
+                        </>
+                      ) : (
+                        <span className="trip-status">{status}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               )

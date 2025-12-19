@@ -512,8 +512,43 @@
     transform: translateY(-6px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+.trip-actions button {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.trip-actions button:first-child {
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  /* vert */
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(22, 163, 74, 0.3);
+}
+
+.trip-actions button:first-child:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(22, 163, 74, 0.4);
+}
+
+.trip-actions button:last-child {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  /* rouge */
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(220, 38, 38, 0.3);
+}
+
+.trip-actions button:last-child:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(220, 38, 38, 0.4);
 }

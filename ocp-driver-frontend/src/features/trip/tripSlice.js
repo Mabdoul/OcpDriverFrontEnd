@@ -5,18 +5,23 @@ const API_URL = 'http://127.0.0.1:8000/api'
 
 export const createTrip = createAsyncThunk(
   'trip/createTrip',
-  async ({ departure, arrival, seats = 1, total_price = 50 }, { rejectWithValue }) => {
+  async ({ departure, arrival }, { rejectWithValue }) => {
     const token = localStorage.getItem('token')
     if (!token) return rejectWithValue('Utilisateur non connecté')
 
     try {
-      const response = await fetch(`${API_URL}/trip/create`, {
+      const response = await fetch(`${API_URL}/client/trip/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ departure, arrival, seats, total_price }),
+        body: JSON.stringify({
+          pickup_lat: departure,
+          pickup_lng: departure,
+          end_lat: arrival,
+          end_lng: arrival,
+        }),
       })
 
       const data = await response.json()
@@ -28,6 +33,7 @@ export const createTrip = createAsyncThunk(
     }
   }
 )
+
 
 const tripSlice = createSlice({
   name: 'trip',

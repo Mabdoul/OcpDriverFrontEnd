@@ -25,7 +25,7 @@ export default function ClientOrderPage() {
   // If token/role are missing, App.jsx will render auth pages.
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault()  // 🔑 This prevents the browser from doing GET
     setSuccess('')
     setError('')
 
@@ -37,12 +37,17 @@ export default function ClientOrderPage() {
     setLoading(true)
     try {
       const response = await fetch(`${API_URL}/client/trip/create`, {
-        method: 'POST',
+        method: 'POST', // 🔑 must be POST
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ origin: pointA, destination: pointB }),
+        body: JSON.stringify({
+          start_lat: pointA,
+          start_lng: pointA,
+          end_lat: pointB,
+          end_lng: pointB,
+        }),
       })
 
       const data = await response.json()
@@ -55,6 +60,8 @@ export default function ClientOrderPage() {
       setLoading(false)
     }
   }
+
+
 
   const handleLogout = () => {
     dispatch(logout())

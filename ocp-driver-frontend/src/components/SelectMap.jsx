@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, useMapEvents, Polygon } from 'react-leaflet'
 import { useState } from 'react'
 import L from 'leaflet'
 
@@ -12,23 +12,10 @@ L.Icon.Default.mergeOptions({
     shadowUrl:
         'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 })
-  const OCP_BOUNDS = [
-        [33.085, -8.635], // sud-ouest
-        [33.105, -8.610], // nord-est
-    ]
-
 function ClickHandler({ onSelect }) {
     useMapEvents({
         click(e) {
-            const { lat, lng } = e.latlng
 
-            if (
-                lat < 33.085 || lat > 33.105 ||
-                lng < -8.635 || lng > -8.610
-            ) {
-                alert('الاختيار خاص يكون داخل Complexe OCP')
-                return
-            }
 
             onSelect(e.latlng)
         },
@@ -38,7 +25,7 @@ function ClickHandler({ onSelect }) {
 
 
 export default function SelectMap({ pointA, pointB, setPointA, setPointB }) {
-  
+
 
     const [selectA, setSelectA] = useState(true)
 
@@ -60,8 +47,8 @@ export default function SelectMap({ pointA, pointB, setPointA, setPointB }) {
             </p>
 
             <MapContainer
-                center={[33.0939, -8.6233]} // Complexe OCP
-                zoom={16}
+                center={[33.1045, -8.6033]} // Complexe OCP
+                zoom={14}
                 style={{ height: '420px', width: '100%' }}
             >
                 <TileLayer

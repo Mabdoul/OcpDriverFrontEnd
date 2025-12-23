@@ -9,7 +9,6 @@ export default function ClientOrderPage() {
   const dispatch = useDispatch()
   const { token, user } = useSelector((state) => state.auth)
 
-  // 🔵 STEP B
   const [pointA, setPointA] = useState(null)
   const [pointB, setPointB] = useState(null)
 
@@ -17,7 +16,6 @@ export default function ClientOrderPage() {
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
 
-  // 🔵 STEP 5
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSuccess('')
@@ -94,7 +92,6 @@ export default function ClientOrderPage() {
 
           <form onSubmit={handleSubmit} className="form">
             
-            {/* 🔵 STEP D */}
             <SelectMap
               pointA={pointA}
               pointB={pointB}

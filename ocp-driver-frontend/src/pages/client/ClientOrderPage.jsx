@@ -17,6 +17,7 @@ export default function ClientOrderPage() {
   const [error, setError] = useState('')
   const [trip, setTrip] = useState(null)
 
+<<<<<<< HEAD
   // 🔁 POLLING: check trip status
   useEffect(() => {
     if (!token) return
@@ -45,6 +46,8 @@ export default function ClientOrderPage() {
   }, [token])
 
   // 🟢 CREATE TRIP
+=======
+>>>>>>> fb7228021c0f5b1a392c84e3e45c088f33488935
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSuccess('')
@@ -130,6 +133,10 @@ export default function ClientOrderPage() {
           {success && <div className="alert success">{success}</div>}
 
           <form onSubmit={handleSubmit} className="form">
+<<<<<<< HEAD
+=======
+            
+>>>>>>> fb7228021c0f5b1a392c84e3e45c088f33488935
             <SelectMap
               pointA={pointA}
               pointB={pointB}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { logout } from '../../features/auth/authSlice'
 import SelectMap from '../../components/SelectMap'
+import './ClientOrderPage.css' // ✅ CSS for animations
 
 const API_URL = 'http://127.0.0.1:8000/api'
 
@@ -11,26 +12,21 @@ export default function ClientOrderPage() {
 
   const [pointA, setPointA] = useState(null)
   const [pointB, setPointB] = useState(null)
-
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
   const [trip, setTrip] = useState(null)
 
-  // 🔁 POLLING: check trip status
+  // 🔁 Polling: check latest trip status every 5s
   useEffect(() => {
     if (!token) return
 
     const checkTripStatus = async () => {
       try {
         const res = await fetch(`${API_URL}/client/trip/latest`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         })
-
         if (!res.ok) return
-
         const data = await res.json()
         setTrip(data)
       } catch (err) {
@@ -40,11 +36,10 @@ export default function ClientOrderPage() {
 
     checkTripStatus()
     const interval = setInterval(checkTripStatus, 5000)
-
     return () => clearInterval(interval)
   }, [token])
 
-  // 🟢 CREATE TRIP
+  // 🟢 Create trip
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSuccess('')
@@ -72,9 +67,7 @@ export default function ClientOrderPage() {
       })
 
       const data = await response.json()
-      if (!response.ok) {
-        throw new Error(data.message || 'Erreur lors de la création du trajet')
-      }
+      if (!response.ok) throw new Error(data.message || 'Erreur lors de la création du trajet')
 
       setSuccess('Trajet commandé avec succès 🚗')
       setPointA(null)
@@ -86,9 +79,7 @@ export default function ClientOrderPage() {
     }
   }
 
-  const handleLogout = () => {
-    dispatch(logout())
-  }
+  const handleLogout = () => dispatch(logout())
 
   return (
     <div className="client-page">
@@ -99,12 +90,8 @@ export default function ClientOrderPage() {
             <span className="brand-text">Client</span>
           </div>
           <div className="client-actions">
-            <span className="client-hello">
-              Bonjour, {user?.name || 'Client'}
-            </span>
-            <button className="logout-btn" onClick={handleLogout}>
-              Se déconnecter
-            </button>
+            <span className="client-hello">Bonjour, {user?.name || 'Client'}</span>
+            <button className="logout-btn" onClick={handleLogout}>Se déconnecter</button>
           </div>
         </div>
       </header>
@@ -114,33 +101,44 @@ export default function ClientOrderPage() {
           <h1 className="client-title">Commander un trajet</h1>
 
           {trip && (
-            <div className="alert info">
-              {trip.status === 'pending' && '⏳ En attente d’un chauffeur'}
+            <div className={`trip-status ${trip.status}`}>
+              {trip.status === 'pending' && (
+                <div className="waiting">
+                  <div className="spinner"></div>
+                  ⏳ En attente d’un chauffeur
+                </div>
+              )}
               {trip.status === 'accepted' && (
-                <>🚗 Chauffeur en route : {trip.chauffeur?.name}</>
+                <div className="accepted">
+                  <div className="car-animation"></div>
+                  🚗 Chauffeur en route : {trip.chauffeur?.name}
+                </div>
               )}
             </div>
           )}
 
-          <p className="client-subtitle">
-            Cliquez sur la carte pour choisir le point de départ et la destination
-          </p>
+          {!trip && (
+            <>
+              <p className="client-subtitle">
+                Cliquez sur la carte pour choisir le point de départ et la destination
+              </p>
 
-          {error && <div className="alert error">{error}</div>}
-          {success && <div className="alert success">{success}</div>}
+              {error && <div className="alert error">{error}</div>}
+              {success && <div className="alert success">{success}</div>}
 
-          <form onSubmit={handleSubmit} className="form">
-            <SelectMap
-              pointA={pointA}
-              pointB={pointB}
-              setPointA={setPointA}
-              setPointB={setPointB}
-            />
-
-            <button type="submit" disabled={loading} className="btn">
-              {loading ? 'Envoi en cours…' : 'Passer commande'}
-            </button>
-          </form>
+              <form onSubmit={handleSubmit} className="form">
+                <SelectMap
+                  pointA={pointA}
+                  pointB={pointB}
+                  setPointA={setPointA}
+                  setPointB={setPointB}
+                />
+                <button type="submit" disabled={loading} className="btn">
+                  {loading ? 'Envoi en cours…' : 'Passer commande'}
+                </button>
+              </form>
+            </>
+          )}
         </div>
       </main>
     </div>

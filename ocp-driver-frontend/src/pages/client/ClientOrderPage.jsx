@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { logout } from '../../features/auth/authSlice'
 import SelectMap from '../../components/SelectMap'
-import './ClientOrderPage.css' // ✅ CSS for animations
+import './ClientOrderPage.css'
 
 const API_URL = 'http://127.0.0.1:8000/api'
 
@@ -16,10 +16,11 @@ export default function ClientOrderPage() {
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
   const [trip, setTrip] = useState(null)
+  const [orderPlaced, setOrderPlaced] = useState(false)
 
   // 🔁 Polling: check latest trip status every 5s
   useEffect(() => {
-    if (!token) return
+    if (!token || !orderPlaced) return
 
     const checkTripStatus = async () => {
       try {
@@ -37,7 +38,7 @@ export default function ClientOrderPage() {
     checkTripStatus()
     const interval = setInterval(checkTripStatus, 5000)
     return () => clearInterval(interval)
-  }, [token])
+  }, [token, orderPlaced])
 
   // 🟢 Create trip
   const handleSubmit = async (e) => {
@@ -72,6 +73,7 @@ export default function ClientOrderPage() {
       setSuccess('Trajet commandé avec succès 🚗')
       setPointA(null)
       setPointB(null)
+      setOrderPlaced(true) // ✅ Start polling
     } catch (err) {
       setError(err.message || 'Une erreur est survenue')
     } finally {
@@ -100,7 +102,7 @@ export default function ClientOrderPage() {
         <div className="client-card">
           <h1 className="client-title">Commander un trajet</h1>
 
-          {trip && (
+          {orderPlaced && trip && (
             <div className={`trip-status ${trip.status}`}>
               {trip.status === 'pending' && (
                 <div className="waiting">
@@ -117,7 +119,7 @@ export default function ClientOrderPage() {
             </div>
           )}
 
-          {!trip && (
+          {!orderPlaced && (
             <>
               <p className="client-subtitle">
                 Cliquez sur la carte pour choisir le point de départ et la destination

@@ -1,67 +1,63 @@
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { logout } from '../../features/auth/authSlice'
-
-const LOCATIONS = [
-  'Centre ville',
-  'Gare principale',
-  'Aéroport',
-  'Zone industrielle',
-  'Quartier résidentiel',
-]
+import SelectMap from '../../components/SelectMap'
 
 const API_URL = 'http://127.0.0.1:8000/api'
 
 export default function ClientOrderPage() {
   const dispatch = useDispatch()
-  const { token,user } = useSelector((state) => state.auth)
+  const { token, user } = useSelector((state) => state.auth)
 
-  const [pointA, setPointA] = useState(LOCATIONS[0])
-  const [pointB, setPointB] = useState(LOCATIONS[1])
+  // 🔵 STEP B
+  const [pointA, setPointA] = useState(null)
+  const [pointB, setPointB] = useState(null)
+
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
 
-  // If token/role are missing, App.jsx will render auth pages.
-
+  // 🔵 STEP 5
   const handleSubmit = async (e) => {
-    e.preventDefault()  // 🔑 This prevents the browser from doing GET
+    e.preventDefault()
     setSuccess('')
     setError('')
 
-    if (pointA === pointB) {
-      setError("Le point de départ et d'arrivée doivent être différents.")
+    if (!pointA || !pointB) {
+      setError('خاصك تختار Point A و Point B من الماب')
       return
     }
 
     setLoading(true)
     try {
       const response = await fetch(`${API_URL}/client/trip/create`, {
-        method: 'POST', // 🔑 must be POST
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          start_lat: pointA,
-          start_lng: pointA,
-          end_lat: pointB,
-          end_lng: pointB,
+          start_lat: pointA.lat,
+          start_lng: pointA.lng,
+          end_lat: pointB.lat,
+          end_lng: pointB.lng,
         }),
       })
 
       const data = await response.json()
-      if (!response.ok) throw new Error(data.message || 'Erreur lors de la création du trajet.')
+      if (!response.ok) {
+        throw new Error(data.message || 'Erreur lors de la création du trajet')
+      }
 
-      setSuccess('Trajet commandé avec succès.')
+      setSuccess('Trajet commandé avec succès 🚗')
+      setPointA(null)
+      setPointB(null)
     } catch (err) {
-      setError(err.message || 'Une erreur est survenue.')
+      setError(err.message || 'Une erreur est survenue')
     } finally {
       setLoading(false)
     }
   }
-
-
 
   const handleLogout = () => {
     dispatch(logout())
@@ -90,40 +86,21 @@ export default function ClientOrderPage() {
         <div className="client-card">
           <h1 className="client-title">Commander un trajet</h1>
           <p className="client-subtitle">
-            Choisissez votre point de départ et votre destination pour réserver un chauffeur.
+            Cliquez sur la carte pour choisir le point de départ et la destination
           </p>
 
           {error && <div className="alert error">{error}</div>}
           {success && <div className="alert success">{success}</div>}
 
           <form onSubmit={handleSubmit} className="form">
-            <div className="field">
-              <label className="label" htmlFor="pointA">Point de départ (Point A)</label>
-              <select
-                id="pointA"
-                value={pointA}
-                onChange={(e) => setPointA(e.target.value)}
-                className="input"
-              >
-                {LOCATIONS.map((loc) => (
-                  <option key={`A-${loc}`} value={loc}>{loc}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="field">
-              <label className="label" htmlFor="pointB">Destination (Point B)</label>
-              <select
-                id="pointB"
-                value={pointB}
-                onChange={(e) => setPointB(e.target.value)}
-                className="input"
-              >
-                {LOCATIONS.map((loc) => (
-                  <option key={`B-${loc}`} value={loc}>{loc}</option>
-                ))}
-              </select>
-            </div>
+            
+            {/* 🔵 STEP D */}
+            <SelectMap
+              pointA={pointA}
+              pointB={pointB}
+              setPointA={setPointA}
+              setPointB={setPointB}
+            />
 
             <button type="submit" disabled={loading} className="btn">
               {loading ? 'Envoi en cours…' : 'Passer commande'}

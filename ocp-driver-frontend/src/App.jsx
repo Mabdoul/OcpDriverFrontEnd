@@ -5,6 +5,7 @@ import RegisterPage from './pages/auth/RegisterPage'
 import ClientOrderPage from './pages/client/ClientOrderPage'
 import ChauffeurPage from './pages/chauffeur/ChauffeurPage'
 import AuthNavbar from './components/layout/AuthNavbar'
+import 'leaflet/dist/leaflet.css'
 import './App.css'
 
 function App() {

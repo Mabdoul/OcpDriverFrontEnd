@@ -14,7 +14,6 @@ export default function ToastHost() {
     const type = error ? 'error' : 'success'
     const message = error || successMessage
 
-    // 🔥 نحيدوها من Redux مباشرة
     dispatch(clearStatus())
 
     setToast({ type, message })

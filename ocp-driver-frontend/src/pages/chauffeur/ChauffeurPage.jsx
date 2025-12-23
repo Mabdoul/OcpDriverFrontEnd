@@ -25,7 +25,7 @@ export default function ChauffeurPage() {
   const [error, setError] = useState('')
   const [trips, setTrips] = useState([])
   const [lastUpdated, setLastUpdated] = useState(null)
-  const [acceptedTrip, setAcceptedTrip] = useState(null) // 🔹 Trajet accepté
+  const [acceptedTrip, setAcceptedTrip] = useState(null)
 
   const fetchTrips = async () => {
     setError('')
@@ -40,11 +40,9 @@ export default function ChauffeurPage() {
           Authorization: `Bearer ${token}`,
         },
       })
-
       const text = await res.text()
       const data = text ? JSON.parse(text) : {}
       if (!res.ok) throw new Error(data.message || data.error || 'Impossible de récupérer les commandes.')
-
       setTrips(Array.isArray(data) ? data : [])
       setLastUpdated(new Date())
     } catch (err) {
@@ -56,9 +54,9 @@ export default function ChauffeurPage() {
 
   useEffect(() => {
     fetchTrips()
-    const intervalId = setInterval(fetchTrips, 5000)
+    const intervalId = setInterval(fetchTrips, 5000) // polling 5s
     return () => clearInterval(intervalId)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleLogout = () => dispatch(logout())
 
@@ -70,8 +68,6 @@ export default function ChauffeurPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'Impossible d’accepter le trajet.')
-
-      // 🔹 Stocker le trajet accepté et cacher la liste
       const trip = trips.find(t => t.id === tripId)
       setAcceptedTrip(trip)
     } catch (err) {
@@ -87,8 +83,23 @@ export default function ChauffeurPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'Impossible de refuser le trajet.')
-
       setTrips(prev => prev.filter(t => t.id !== tripId))
+    } catch (err) {
+      alert(err.message)
+    }
+  }
+
+  const handleArrived = async (tripId) => {
+    try {
+      const res = await fetch(`${API_URL}/chauffeur/trip/${tripId}/complete`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Impossible de marquer comme arrivé.')
+      alert('✅ Trajet marqué comme complet')
+      setAcceptedTrip(null) // retour à la liste des trips pendants
+      fetchTrips() // recharge les trips jdad
     } catch (err) {
       alert(err.message)
     }
@@ -117,7 +128,6 @@ export default function ChauffeurPage() {
         <div className="chauffeur-card">
           <h1 className="client-title">Commandes de trajets</h1>
 
-          {/* 🔹 Liste des commandes si aucun trajet accepté */}
           {!acceptedTrip && (
             <>
               <p className="client-subtitle">
@@ -131,7 +141,6 @@ export default function ChauffeurPage() {
                   const origin = t.start_lat ?? '—'
                   const destination = t.end_lat ?? '—'
                   const status = t.status ?? 'en attente'
-
                   return (
                     <div key={id} className="trip-card">
                       <div className="trip-top">
@@ -190,7 +199,6 @@ export default function ChauffeurPage() {
             </>
           )}
 
-          {/* 🔹 Map du trajet accepté avec uniquement les marqueurs */}
           {acceptedTrip && (
             <div className="trip-map" style={{ height: '400px', marginTop: '20px' }}>
               <MapContainer
@@ -209,6 +217,22 @@ export default function ChauffeurPage() {
                   <Popup>Arrivée</Popup>
                 </Marker>
               </MapContainer>
+
+              {/* 🔹 Button “Arrivé au client” */}
+              <button
+                onClick={() => handleArrived(acceptedTrip.id)}
+                style={{
+                  marginTop: '15px',
+                  padding: '8px 15px',
+                  backgroundColor: '#55b240ff',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '5px',
+                  cursor: 'pointer'
+                }}
+              >
+                Arrivé au client
+              </button>
             </div>
           )}
 
@@ -217,3 +241,4 @@ export default function ChauffeurPage() {
     </div>
   )
 }
+

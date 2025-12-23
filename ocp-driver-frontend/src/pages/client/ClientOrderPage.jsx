@@ -30,6 +30,16 @@ export default function ClientOrderPage() {
         if (!res.ok) return
         const data = await res.json()
         setTrip(data)
+
+        // 🔹 Si chauffeur marque comme arrivé, reset page pour nouvelle commande
+        if (data.status === 'completed') {
+          setTrip(null)
+          setOrderPlaced(false)
+          setPointA(null)
+          setPointB(null)
+          setSuccess('✅ Trajet terminé, vous pouvez commander un nouveau trajet')
+        }
+
       } catch (err) {
         console.log('Polling error', err)
       }
@@ -40,7 +50,6 @@ export default function ClientOrderPage() {
     return () => clearInterval(interval)
   }, [token, orderPlaced])
 
-  // 🟢 Create trip
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSuccess('')
@@ -73,7 +82,7 @@ export default function ClientOrderPage() {
       setSuccess('Trajet commandé avec succès 🚗')
       setPointA(null)
       setPointB(null)
-      setOrderPlaced(true) // ✅ Start polling
+      setOrderPlaced(true)
     } catch (err) {
       setError(err.message || 'Une erreur est survenue')
     } finally {

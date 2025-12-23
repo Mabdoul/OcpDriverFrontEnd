@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { logout } from '../../features/auth/authSlice'
 import SelectMap from '../../components/SelectMap'
@@ -9,15 +9,42 @@ export default function ClientOrderPage() {
   const dispatch = useDispatch()
   const { token, user } = useSelector((state) => state.auth)
 
-  // 🔵 STEP B
   const [pointA, setPointA] = useState(null)
   const [pointB, setPointB] = useState(null)
 
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
+  const [trip, setTrip] = useState(null)
 
-  // 🔵 STEP 5
+  // 🔁 POLLING: check trip status
+  useEffect(() => {
+    if (!token) return
+
+    const checkTripStatus = async () => {
+      try {
+        const res = await fetch(`${API_URL}/client/trip/latest`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (!res.ok) return
+
+        const data = await res.json()
+        setTrip(data)
+      } catch (err) {
+        console.log('Polling error', err)
+      }
+    }
+
+    checkTripStatus()
+    const interval = setInterval(checkTripStatus, 5000)
+
+    return () => clearInterval(interval)
+  }, [token])
+
+  // 🟢 CREATE TRIP
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSuccess('')
@@ -75,7 +102,7 @@ export default function ClientOrderPage() {
             <span className="client-hello">
               Bonjour, {user?.name || 'Client'}
             </span>
-            <button type="button" className="logout-btn" onClick={handleLogout}>
+            <button className="logout-btn" onClick={handleLogout}>
               Se déconnecter
             </button>
           </div>
@@ -85,6 +112,16 @@ export default function ClientOrderPage() {
       <main className="client-main">
         <div className="client-card">
           <h1 className="client-title">Commander un trajet</h1>
+
+          {trip && (
+            <div className="alert info">
+              {trip.status === 'pending' && '⏳ En attente d’un chauffeur'}
+              {trip.status === 'accepted' && (
+                <>🚗 Chauffeur en route : {trip.chauffeur?.name}</>
+              )}
+            </div>
+          )}
+
           <p className="client-subtitle">
             Cliquez sur la carte pour choisir le point de départ et la destination
           </p>
@@ -93,8 +130,6 @@ export default function ClientOrderPage() {
           {success && <div className="alert success">{success}</div>}
 
           <form onSubmit={handleSubmit} className="form">
-            
-            {/* 🔵 STEP D */}
             <SelectMap
               pointA={pointA}
               pointB={pointB}

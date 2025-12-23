@@ -88,10 +88,23 @@ export default function ChauffeurPage() {
           </div>
           <div className="client-actions">
             <span className="client-hello">{user?.name ? `Bonjour, ${user.name}` : '—'}</span>
-            <span className="client-hello">{lastUpdated ? `Dernière mise à jour: ${lastUpdated.toLocaleTimeString()}` : '—'}</span>
-            <button type="button" className="nav-link" onClick={fetchTrips} disabled={loading}>
+            <span
+              className="client-hello"
+              style={{ display: 'none' }}
+            >
+              {lastUpdated ? `Dernière mise à jour: ${lastUpdated.toLocaleTimeString()}` : '—'}
+            </span>
+
+            <button
+              type="button"
+              className="nav-link"
+              onClick={fetchTrips}
+              disabled={loading}
+              style={{ display: 'none' }}
+            >
               {loading ? 'Actualisation…' : 'Actualiser'}
             </button>
+
             <button type="button" className="logout-btn" onClick={handleLogout}>Se déconnecter</button>
           </div>
         </div>

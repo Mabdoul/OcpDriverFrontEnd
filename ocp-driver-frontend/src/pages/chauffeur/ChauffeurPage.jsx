@@ -1,17 +1,22 @@
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { logout } from '../../features/auth/authSlice'
+import ChauffeurTripMap from '../ChauffeurTripMap'
 
 const API_URL = 'http://127.0.0.1:8000/api'
+const [selectedTrip, setSelectedTrip] = useState(null)
 
 export default function ChauffeurPage() {
   const dispatch = useDispatch()
   const { token, user } = useSelector((state) => state.auth)
 
+  const [selectedTrip, setSelectedTrip] = useState(null) 
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [trips, setTrips] = useState([])
   const [lastUpdated, setLastUpdated] = useState(null)
+
 
   const fetchTrips = async () => {
     setError('')
@@ -56,11 +61,19 @@ export default function ChauffeurPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'Impossible d’accepter le trajet.')
+
+      // ouvrir map avec start/end vrais coordonnées
+      setSelectedTrip({
+        start: { lat: parseFloat(data.start_lat), lng: parseFloat(data.start_lng) },
+        end: { lat: parseFloat(data.end_lat), lng: parseFloat(data.end_lng) }
+      })
+
       fetchTrips()
     } catch (err) {
       alert(err.message)
     }
   }
+
 
   const handleRefuse = async (tripId) => {
     try {
@@ -109,6 +122,14 @@ export default function ChauffeurPage() {
           </div>
         </div>
       </header>
+      {selectedTrip && (
+        <ChauffeurTripMap
+          start={selectedTrip.start}
+          end={selectedTrip.end}
+          onClose={() => setSelectedTrip(null)}
+        />
+      )}
+
 
       <main className="chauffeur-main">
         <div className="chauffeur-card">
@@ -147,7 +168,7 @@ export default function ChauffeurPage() {
                       {status === 'pending' ? (
                         <>
                           <button
-                            onClick={() => handleAccept(id)}
+                            onClick={() => handleAccept(t.id)}
                             style={{
                               padding: '5px 12px',
                               marginRight: '8px',

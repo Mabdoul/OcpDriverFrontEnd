@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, useMapEvents, Polygon } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, useMapEvents, Polygon, Popup, Polyline } from 'react-leaflet'
 import { useState } from 'react'
 import L from 'leaflet'
 
@@ -12,6 +12,18 @@ L.Icon.Default.mergeOptions({
     shadowUrl:
         'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 })
+function getDistanceKm(latlng1, latlng2) {
+    const R = 6371; // km
+    const dLat = ((latlng2.lat - latlng1.lat) * Math.PI) / 180;
+    const dLng = ((latlng2.lng - latlng1.lng) * Math.PI) / 180;
+    const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(latlng1.lat * Math.PI / 180) *
+        Math.cos(latlng2.lat * Math.PI / 180) *
+        Math.sin(dLng / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // km
+}
 function ClickHandler({ onSelect }) {
     useMapEvents({
         click(e) {
@@ -42,9 +54,10 @@ export default function SelectMap({ pointA, pointB, setPointA, setPointB }) {
         <>
             <p>
                 {selectA
-                    ? 'Cliquez sur la carte pour choisir Point A'
-                    : 'Cliquez sur la carte pour choisir Point B'}
+                    ? 'Cliquez sur la carte pour choisir Point départ (A)'
+                    : 'Cliquez sur la carte pour choisir Point d\'arrivée (B)'}
             </p>
+
 
             <MapContainer
                 center={[33.1045, -8.6033]} // Complexe OCP
@@ -55,6 +68,7 @@ export default function SelectMap({ pointA, pointB, setPointA, setPointB }) {
                     url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
                     attribution="Tiles © Esri"
                 />
+
 
                 <ClickHandler onSelect={handleSelect} />
 

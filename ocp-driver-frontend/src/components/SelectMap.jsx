@@ -76,46 +76,54 @@ const redMarker = new L.Icon({
 
 
 export default function SelectMap({ pointA, pointB, setPointA, setPointB }) {
-  const handleSelect = (latlng) => {
-    if (!pointA) setPointA(latlng)
-    else if (!pointB) setPointB(latlng)
-  }
+    const [selectA, setSelectA] = useState(true)
 
-  return (
-    <>
-      {/* ✅ Légende permanente */}
-      <div style={{ marginBottom: '10px' }}>
-        <span style={{ color: 'green', fontWeight: 'bold' }}>● Départ</span>{' '}
-        <span style={{ color: 'red', fontWeight: 'bold', marginLeft: '15px' }}>● Arrivée</span>
-      </div>
+    const handleSelect = (latlng) => {
+        if (selectA) {
+            setPointA(latlng)
+        } else {
+            setPointB(latlng)
+        }
+        setSelectA(!selectA)
+    }
 
-      <MapContainer
-        center={[33.1045, -8.6033]}
-        zoom={14}
-        style={{ height: '420px', width: '100%' }}
-        onClick={(e) => handleSelect(e.latlng)}
-      >
-        <TileLayer
-          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-          attribution="Tiles © Esri"
-        />
+    return (
+        <>
+            <p>
+                {selectA
+                    ? 'Cliquez sur la carte pour choisir Point départ (A)'
+                    : "Cliquez sur la carte pour choisir Point d'arrivée (B)"}
+            </p>
 
-        {/* 🏷️ FIXED PLACES → TEXT ONLY */}
-        {FIXED_LOCATIONS.map((loc, index) => (
-          <Marker
-            key={index}
-            position={loc.position}
-            icon={textIcon(loc.name)}
-            interactive={false}
-          />
-        ))}
+            <MapContainer
+                center={[33.1045, -8.6033]}
+                zoom={14}
+                style={{ height: '420px', width: '100%' }}
+            >
+                <TileLayer
+                    url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                    attribution="Tiles © Esri"
+                />
 
-        {/* 🔹 Point A → vert */}
-        {pointA && <Marker position={pointA} icon={greenMarker} />}
+                <ClickHandler onSelect={handleSelect} />
 
-        {/* 🔴 Point B → rouge */}
-        {pointB && <Marker position={pointB} icon={redMarker} />}
-      </MapContainer>
-    </>
-  )
+                {/* 🏷️ FIXED PLACES → TEXT ONLY */}
+                {FIXED_LOCATIONS.map((loc, index) => (
+                    <Marker
+                        key={index}
+                        position={loc.position}
+                        icon={textIcon(loc.name)}
+                        interactive={false}
+                    />
+                ))}
+
+                {/* 🔹 Point A → vert */}
+                {pointA && <Marker position={pointA} icon={greenMarker} />}
+
+                {/* 🔴 Point B → rouge */}
+                {pointB && <Marker position={pointB} icon={redMarker} />}
+
+            </MapContainer>
+        </>
+    )
 }

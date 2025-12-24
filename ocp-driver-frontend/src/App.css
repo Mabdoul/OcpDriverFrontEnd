@@ -563,3 +563,54 @@
   white-space: nowrap;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
+/* Mobile : cacher actualiser et dernière mise à jour */
+@media (max-width: 768px) {
+  .client-actions span.client-hello:nth-child(2),
+  .client-actions button.nav-link {
+    display: none;
+  }
+
+  /* Ajuster espacement entre le nom et le bouton logout */
+  .client-actions {
+    gap: 8px;
+  }
+}
+@media (max-width: 768px) {
+  .logout-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+@media (min-width: 769px) {
+  .client-navbar-inner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .client-actions {
+    gap: 12px;
+    flex-wrap: nowrap;
+  }
+}
+.trip-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+  grid-template-columns: 1fr; /* mobile : une colonne */
+}
+
+@media (min-width: 900px) {
+  .trip-list {
+    grid-template-columns: 1fr 1fr; /* PC : deux colonnes */
+  }
+}
+.trip-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 14px;
+  background: #f9fafb;
+  display: flex;
+  flex-direction: column; /* empiler sur mobile */
+  gap: 10px;
+}

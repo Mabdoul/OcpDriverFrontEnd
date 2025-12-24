@@ -552,3 +552,14 @@
   transform: translateY(-1px);
   box-shadow: 0 10px 22px rgba(220, 38, 38, 0.4);
 }
+.map-text-label {
+  font-weight: 600;
+  font-size: 13px;
+  color: #000;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}

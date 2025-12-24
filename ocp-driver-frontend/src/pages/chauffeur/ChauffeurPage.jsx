@@ -16,6 +16,54 @@ L.Icon.Default.mergeOptions({
   shadowUrl:
     'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 })
+// 📍 Fixed locations (TEXT ONLY)
+const FIXED_LOCATIONS = [
+  {
+    name: '🚌 Station De Bus',
+    position: [33.111555110432, -8.5987172810223],
+  },
+  {
+    name: '🏭 Digital Manufacturing',
+    position: [33.111088706459, -8.5949029308404],
+  },
+  {
+    name: '🎓 UM6P',
+    position: [33.110540521306, -8.5934497437592],
+  },
+  {
+    name: '🏢 Administration',
+    position: [33.108913919205, -8.5917451357636],
+  },
+]
+
+// 🏷️ Text-only icon
+const textIcon = (text) =>
+  L.divIcon({
+    className: 'map-text-label',
+    html: `<div>${text}</div>`,
+    iconSize: [150, 30],
+    iconAnchor: [75, 15],
+  })
+const greenMarker = new L.Icon({
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png'
+})
+
+const redMarker = new L.Icon({
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png'
+})
+
 
 export default function ChauffeurPage() {
   const dispatch = useDispatch()
@@ -201,6 +249,13 @@ export default function ChauffeurPage() {
 
           {acceptedTrip && (
             <div className="trip-map" style={{ height: '400px', marginTop: '20px' }}>
+
+              {/* LÉGENDE */}
+              <div style={{ marginBottom: '10px', fontWeight: 'bold' }}>
+                <span style={{ color: 'green', marginRight: '15px' }}>🟢 Départ</span>
+                <span style={{ color: 'red' }}>🔴 Arrivée</span>
+              </div>
+
               <MapContainer
                 center={[acceptedTrip.start_lat, acceptedTrip.start_lng]}
                 zoom={14}
@@ -210,12 +265,29 @@ export default function ChauffeurPage() {
                   url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
                   attribution="Tiles © Esri"
                 />
-                <Marker position={[acceptedTrip.start_lat, acceptedTrip.start_lng]}>
-                  <Popup>Départ</Popup>
-                </Marker>
-                <Marker position={[acceptedTrip.end_lat, acceptedTrip.end_lng]}>
-                  <Popup>Arrivée</Popup>
-                </Marker>
+
+                {/* 🏷️ Fixed place names */}
+                {FIXED_LOCATIONS.map((loc, index) => (
+                  <Marker
+                    key={index}
+                    position={loc.position}
+                    icon={textIcon(loc.name)}
+                    interactive={false}
+                  />
+                ))}
+
+                {/* 🔴 Départ */}
+                <Marker
+                  position={[acceptedTrip.start_lat, acceptedTrip.start_lng]}
+                  icon={greenMarker}
+                />
+
+                {/* 🟢 Arrivée */}
+                <Marker
+                  position={[acceptedTrip.end_lat, acceptedTrip.end_lng]}
+                  icon={redMarker}
+                />
+
               </MapContainer>
 
               {/* 🔹 Button “Arrivé au client” */}
@@ -235,10 +307,8 @@ export default function ChauffeurPage() {
               </button>
             </div>
           )}
-
         </div>
       </main>
     </div>
   )
 }
-
